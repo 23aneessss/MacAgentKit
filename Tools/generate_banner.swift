@@ -5,8 +5,10 @@
 // Usage:
 //   swift Tools/generate_banner.swift [output.png]
 //
-// Produces an on-brand dark banner with the name, tagline, and a tiny
-// "AX tree → action" motif. Pure CoreGraphics/CoreText — no third-party deps.
+// Produces a professional, on-brand dark banner: a gradient backdrop with a
+// faint dot grid, a logo mark, the name + tagline + metadata chips, and an
+// "editor window" code card with syntax-highlighted Swift. Pure
+// CoreGraphics/CoreText — no third-party dependencies.
 
 import CoreGraphics
 import CoreText
@@ -34,100 +36,244 @@ else {
     exit(1)
 }
 
+// CoreGraphics origin is bottom-left; design top-down and convert.
+func top(_ y: CGFloat) -> CGFloat { CGFloat(height) - y }
+
 func rgb(_ r: Double, _ g: Double, _ b: Double, _ a: Double = 1) -> CGColor {
     CGColor(colorSpace: colorSpace, components: [r, g, b, a]) ?? CGColor(gray: 0, alpha: 1)
 }
 
-let background = rgb(0.05, 0.07, 0.09)
-let accent = rgb(1.0, 0.45, 0.0)  // MacAgentKit orange
-let nodeColor = rgb(0.20, 0.55, 0.95)
-let textPrimary = rgb(0.96, 0.97, 0.98)
-let textSecondary = rgb(0.62, 0.67, 0.73)
+// GitHub-dark-inspired palette — familiar and professional to developers.
+let bgTop = rgb(0.043, 0.055, 0.078)  // #0B0E14
+let bgBottom = rgb(0.071, 0.090, 0.125)  // #121720
+let textPrimary = rgb(0.902, 0.929, 0.953)  // #E6EDF3
+let textSecondary = rgb(0.545, 0.580, 0.620)  // #8B949E
+let accent = rgb(0.941, 0.533, 0.243)  // #F0883E  orange
+let codeKeyword = rgb(0.941, 0.533, 0.243)  // orange
+let codeType = rgb(0.475, 0.757, 1.0)  // #79C0FF blue
+let codeString = rgb(0.494, 0.831, 0.541)  // #7EE787 green
+let codeFunc = rgb(0.824, 0.659, 1.0)  // #D2A8FF purple
+let codeComment = rgb(0.431, 0.475, 0.522)  // #6E7681
+let codePlain = rgb(0.792, 0.835, 0.878)
+let cardFill = rgb(0.086, 0.106, 0.145)  // #161B25
+let cardBorder = rgb(0.137, 0.165, 0.220)  // #232A38
+let cardHeader = rgb(0.067, 0.082, 0.114)
 
-// Background.
-context.setFillColor(background)
-context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+// MARK: Background
 
-// Subtle accent bar along the bottom.
-context.setFillColor(accent)
-context.fill(CGRect(x: 0, y: 0, width: width, height: 8))
+if let gradient = CGGradient(
+    colorsSpace: colorSpace, colors: [bgTop, bgBottom] as CFArray, locations: [0, 1])
+{
+    context.drawLinearGradient(
+        gradient,
+        start: CGPoint(x: 0, y: CGFloat(height)),
+        end: CGPoint(x: CGFloat(width), y: 0),
+        options: [])
+} else {
+    context.setFillColor(bgTop)
+    context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+}
 
-// MARK: Text
+// Faint dot grid for subtle texture.
+context.setFillColor(rgb(1, 1, 1, 0.025))
+let gridStep: CGFloat = 34
+var gx: CGFloat = gridStep
+while gx < CGFloat(width) {
+    var gy: CGFloat = gridStep
+    while gy < CGFloat(height) {
+        context.fillEllipse(in: CGRect(x: gx - 1, y: gy - 1, width: 2, height: 2))
+        gy += gridStep
+    }
+    gx += gridStep
+}
 
-func drawText(_ string: String, fontSize: CGFloat, weight: CGFloat, color: CGColor, x: CGFloat, y: CGFloat) {
-    let font = CTFontCreateUIFontForLanguage(.system, fontSize, nil) ?? CTFontCreateWithName("Helvetica" as CFString, fontSize, nil)
-    let traits: [CFString: Any] = [kCTFontWeightTrait: weight]
-    let attributesDict: [CFString: Any] = [kCTFontTraitsAttribute: traits]
-    let descriptor = CTFontDescriptorCreateWithAttributes(attributesDict as CFDictionary)
-    let weightedFont = CTFontCreateCopyWithAttributes(font, fontSize, nil, descriptor)
+// Soft accent glow behind the logo/title.
+if let glow = CGGradient(
+    colorsSpace: colorSpace,
+    colors: [rgb(0.941, 0.533, 0.243, 0.16), rgb(0.941, 0.533, 0.243, 0)] as CFArray,
+    locations: [0, 1])
+{
+    context.drawRadialGradient(
+        glow,
+        startCenter: CGPoint(x: 150, y: top(242)), startRadius: 0,
+        endCenter: CGPoint(x: 150, y: top(242)), endRadius: 360,
+        options: [])
+}
 
+// MARK: Text helpers
+
+let systemFontName = "Helvetica Neue"
+let monoFontName = "Menlo"
+
+func font(_ name: String, _ size: CGFloat, bold: Bool = false) -> CTFont {
+    let resolved = bold ? "\(name) Bold" : name
+    return CTFontCreateWithName(resolved as CFString, size, nil)
+}
+
+@discardableResult
+func draw(_ string: String, font ctFont: CTFont, color: CGColor, x: CGFloat, y: CGFloat) -> CGFloat {
     let attributes: [CFString: Any] = [
-        kCTFontAttributeName: weightedFont,
+        kCTFontAttributeName: ctFont,
         kCTForegroundColorAttributeName: color,
     ]
     guard let attributed = CFAttributedStringCreate(nil, string as CFString, attributes as CFDictionary) else {
-        return
+        return 0
     }
     let line = CTLineCreateWithAttributedString(attributed)
     context.textPosition = CGPoint(x: x, y: y)
     CTLineDraw(line, context)
+    return CGFloat(CTLineGetTypographicBounds(line, nil, nil, nil))
 }
 
-// Title + tagline (CoreGraphics origin is bottom-left).
-drawText("MacAgentKit", fontSize: 96, weight: 0.6, color: textPrimary, x: 80, y: 380)
-drawText(
-    "The missing low-level toolkit for macOS automation & agents",
-    fontSize: 34, weight: 0.0, color: textSecondary, x: 84, y: 320)
-drawText("Swift • macOS 13+ • zero dependencies", fontSize: 26, weight: 0.0, color: accent, x: 84, y: 270)
-
-// MARK: Motif — AX tree → action
-
-func fillCircle(center: CGPoint, radius: CGFloat, color: CGColor) {
-    context.setFillColor(color)
-    context.fillEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+func measure(_ string: String, font ctFont: CTFont) -> CGFloat {
+    let attributes: [CFString: Any] = [kCTFontAttributeName: ctFont]
+    guard let attributed = CFAttributedStringCreate(nil, string as CFString, attributes as CFDictionary) else {
+        return 0
+    }
+    let line = CTLineCreateWithAttributedString(attributed)
+    return CGFloat(CTLineGetTypographicBounds(line, nil, nil, nil))
 }
 
-func line(from a: CGPoint, to b: CGPoint, color: CGColor, lineWidth: CGFloat = 3) {
-    context.setStrokeColor(color)
-    context.setLineWidth(lineWidth)
-    context.move(to: a)
-    context.addLine(to: b)
-    context.strokePath()
+func roundedRect(_ rect: CGRect, radius: CGFloat, fill: CGColor? = nil, stroke: CGColor? = nil, lineWidth: CGFloat = 1) {
+    let path = CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil)
+    if let fill {
+        context.addPath(path)
+        context.setFillColor(fill)
+        context.fillPath()
+    }
+    if let stroke {
+        context.addPath(path)
+        context.setStrokeColor(stroke)
+        context.setLineWidth(lineWidth)
+        context.strokePath()
+    }
 }
 
-let treeRootX: CGFloat = 880
-let treeRootY: CGFloat = 460
-let root = CGPoint(x: treeRootX, y: treeRootY)
-let childA = CGPoint(x: treeRootX - 70, y: treeRootY - 90)
-let childB = CGPoint(x: treeRootX + 70, y: treeRootY - 90)
-let leaf = CGPoint(x: treeRootX + 70, y: treeRootY - 180)
+// MARK: Logo mark — rounded badge with a minimal AX-node motif
 
-line(from: root, to: childA, color: textSecondary)
-line(from: root, to: childB, color: textSecondary)
-line(from: childB, to: leaf, color: textSecondary)
-fillCircle(center: root, radius: 16, color: nodeColor)
-fillCircle(center: childA, radius: 14, color: nodeColor)
-fillCircle(center: childB, radius: 14, color: nodeColor)
-fillCircle(center: leaf, radius: 14, color: accent)  // the matched element
+let logoRect = CGRect(x: 96, y: top(280), width: 76, height: 76)
+roundedRect(logoRect, radius: 20, fill: cardFill, stroke: cardBorder, lineWidth: 1.5)
+do {
+    let cx = logoRect.midX
+    let cy = logoRect.midY
+    let rootP = CGPoint(x: cx, y: cy + 18)
+    let leftP = CGPoint(x: cx - 18, y: cy - 6)
+    let rightP = CGPoint(x: cx + 18, y: cy - 6)
+    let leafP = CGPoint(x: cx + 18, y: cy - 26)
+    context.setStrokeColor(textSecondary)
+    context.setLineWidth(2)
+    for (a, b) in [(rootP, leftP), (rootP, rightP), (rightP, leafP)] {
+        context.move(to: a)
+        context.addLine(to: b)
+        context.strokePath()
+    }
+    func dot(_ p: CGPoint, _ r: CGFloat, _ c: CGColor) {
+        context.setFillColor(c)
+        context.fillEllipse(in: CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2))
+    }
+    dot(rootP, 5.5, codeType)
+    dot(leftP, 4.5, codeType)
+    dot(rightP, 4.5, codeType)
+    dot(leafP, 5.5, accent)
+}
 
-// Arrow → action.
-let arrowStart = CGPoint(x: leaf.x + 28, y: leaf.y)
-let arrowEnd = CGPoint(x: arrowStart.x + 90, y: leaf.y)
-line(from: arrowStart, to: arrowEnd, color: accent, lineWidth: 4)
-context.setFillColor(accent)
-context.move(to: CGPoint(x: arrowEnd.x + 14, y: arrowEnd.y))
-context.addLine(to: CGPoint(x: arrowEnd.x - 6, y: arrowEnd.y + 10))
-context.addLine(to: CGPoint(x: arrowEnd.x - 6, y: arrowEnd.y - 10))
-context.closePath()
-context.fillPath()
+// MARK: Title + tagline
 
-// "action" pill.
-let pill = CGRect(x: arrowEnd.x + 28, y: leaf.y - 26, width: 150, height: 52)
-let pillPath = CGPath(roundedRect: pill, cornerWidth: 26, cornerHeight: 26, transform: nil)
-context.addPath(pillPath)
-context.setFillColor(accent)
-context.fillPath()
-drawText("press()", fontSize: 24, weight: 0.4, color: background, x: pill.minX + 28, y: pill.minY + 16)
+let titleX = logoRect.maxX + 24
+draw("MacAgentKit", font: font(systemFontName, 64, bold: true), color: textPrimary, x: titleX, y: top(264))
+
+draw(
+    "The missing low-level toolkit for",
+    font: font(systemFontName, 30), color: textSecondary, x: 100, y: top(352))
+draw(
+    "macOS automation & AI agents.",
+    font: font(systemFontName, 30), color: textSecondary, x: 100, y: top(392))
+
+// MARK: Metadata chips
+
+func chip(_ text: String, x: CGFloat, y: CGFloat, accentText: Bool = false) -> CGFloat {
+    let chipFont = font(monoFontName, 19)
+    let padding: CGFloat = 18
+    let textWidth = measure(text, font: chipFont)
+    let chipHeight: CGFloat = 38
+    let rect = CGRect(x: x, y: y - chipHeight, width: textWidth + padding * 2, height: chipHeight)
+    roundedRect(rect, radius: 10, fill: cardFill, stroke: cardBorder, lineWidth: 1)
+    draw(text, font: chipFont, color: accentText ? accent : textSecondary, x: x + padding, y: y - chipHeight + 11)
+    return rect.width + 12
+}
+
+do {
+    var x: CGFloat = 100
+    let chipBaseline = top(444)
+    x += chip("Swift", x: x, y: chipBaseline, accentText: true)
+    x += chip("macOS 13+", x: x, y: chipBaseline)
+    x += chip("Zero dependencies", x: x, y: chipBaseline)
+    x += chip("MIT", x: x, y: chipBaseline)
+}
+
+// MARK: Code card — an "editor window" with syntax-highlighted Swift
+
+let card = CGRect(x: 712, y: top(502), width: 476, height: 320)
+// Drop shadow.
+context.saveGState()
+context.setShadow(offset: CGSize(width: 0, height: -18), blur: 40, color: rgb(0, 0, 0, 0.45))
+roundedRect(card, radius: 16, fill: cardFill)
+context.restoreGState()
+roundedRect(card, radius: 16, stroke: cardBorder, lineWidth: 1.5)
+
+// Header bar with traffic-light dots + filename.
+let headerHeight: CGFloat = 44
+let headerRect = CGRect(x: card.minX, y: card.maxY - headerHeight, width: card.width, height: headerHeight)
+context.saveGState()
+context.addPath(CGPath(roundedRect: card, cornerWidth: 16, cornerHeight: 16, transform: nil))
+context.clip()
+context.setFillColor(cardHeader)
+context.fill(headerRect)
+context.restoreGState()
+// Header divider.
+context.setStrokeColor(cardBorder)
+context.setLineWidth(1)
+context.move(to: CGPoint(x: card.minX, y: headerRect.minY))
+context.addLine(to: CGPoint(x: card.maxX, y: headerRect.minY))
+context.strokePath()
+
+do {
+    let dotY = headerRect.midY
+    let colors = [rgb(0.92, 0.34, 0.32), rgb(0.95, 0.74, 0.18), rgb(0.18, 0.78, 0.27)]
+    for (index, color) in colors.enumerated() {
+        let dx = card.minX + 24 + CGFloat(index) * 22
+        context.setFillColor(color)
+        context.fillEllipse(in: CGRect(x: dx - 6, y: dotY - 6, width: 12, height: 12))
+    }
+    let nameFont = font(monoFontName, 17)
+    let name = "Automate.swift"
+    draw(name, font: nameFont, color: textSecondary, x: card.midX - measure(name, font: nameFont) / 2, y: dotY - 7)
+}
+
+// Syntax-highlighted code. Each line is a list of (text, color) tokens.
+let codeFont = font(monoFontName, 19)
+let codeLines: [[(String, CGColor)]] = [
+    [("import", codeKeyword), (" MacAgentKit", codeType)],
+    [],
+    [("// Drive another app by its stable id", codeComment)],
+    [("let", codeKeyword), (" app = ", codePlain), ("AXElement", codeType), (".application(", codePlain)],
+    [("    bundleID: ", codePlain), ("\"com.apple.Safari\"", codeString), (")", codePlain)],
+    [],
+    [("let", codeKeyword), (" reload = app?.", codePlain), ("firstByIdentifier", codeFunc)],
+    [("    (", codePlain), ("\"ReloadButton\"", codeString), (")", codePlain)],
+    [("try", codeKeyword), (" reload?.", codePlain), ("press", codeFunc), ("()", codePlain)],
+]
+
+let codeStartX = card.minX + 28
+var lineTop = card.maxY - headerHeight - 38
+let lineHeight: CGFloat = 28
+for tokens in codeLines {
+    var x = codeStartX
+    for (text, color) in tokens {
+        x += draw(text, font: codeFont, color: color, x: x, y: lineTop)
+    }
+    lineTop -= lineHeight
+}
 
 // MARK: Write PNG
 
