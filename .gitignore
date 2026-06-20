@@ -15,4 +15,6 @@ DerivedData/
 # Docs build output
 docs-build/
 *.doccarchive
+
+# Claude Code workspace
 .claude/
