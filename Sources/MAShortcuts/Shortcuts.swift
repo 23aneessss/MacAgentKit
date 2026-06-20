@@ -50,7 +50,13 @@ public enum Shortcuts {
               result.status == 0 else {
             return []
         }
-        return result.stdout
+        return parseList(result.stdout)
+    }
+
+    /// Parses the newline-separated output of `shortcuts list` into names.
+    /// Pure and testable.
+    static func parseList(_ output: String) -> [String] {
+        output
             .split(separator: "\n", omittingEmptySubsequences: true)
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
