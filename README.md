@@ -1,5 +1,7 @@
 <div align="center">
 
+![MacAgentKit](docs/banner.png)
+
 # 🛠️ MacAgentKit
 
 **The missing low-level toolkit for macOS automation & agents.**
