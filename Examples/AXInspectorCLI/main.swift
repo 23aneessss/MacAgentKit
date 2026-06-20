@@ -109,6 +109,7 @@ func describe(_ element: AXElement) -> String {
 var printedCount = 0
 var visited = Set<AXElement>()
 
+@MainActor
 func walk(_ element: AXElement, depth: Int) {
     guard depth <= maxDepth else { return }
     guard visited.insert(element).inserted else { return }

@@ -1,0 +1,44 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:MacAgentKit}",
+            "name": "Debug PermissionsDemo",
+            "target": "PermissionsDemo",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug PermissionsDemo"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:MacAgentKit}",
+            "name": "Release PermissionsDemo",
+            "target": "PermissionsDemo",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release PermissionsDemo"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:MacAgentKit}",
+            "name": "Debug AXInspectorCLI",
+            "target": "AXInspectorCLI",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug AXInspectorCLI"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:MacAgentKit}",
+            "name": "Release AXInspectorCLI",
+            "target": "AXInspectorCLI",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release AXInspectorCLI"
+        }
+    ]
+}
