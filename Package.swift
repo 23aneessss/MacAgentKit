@@ -64,6 +64,20 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
 
+        // MARK: Examples
+        .executableTarget(
+            name: "AXInspectorCLI",
+            dependencies: ["MacAgentKit"],
+            path: "Examples/AXInspectorCLI",
+            swiftSettings: swiftSettings
+        ),
+        .executableTarget(
+            name: "PermissionsDemo",
+            dependencies: ["MacAgentKit"],
+            path: "Examples/PermissionsDemo",
+            swiftSettings: swiftSettings
+        ),
+
         // MARK: Tests
         .testTarget(
             name: "MacAgentKitTests",
