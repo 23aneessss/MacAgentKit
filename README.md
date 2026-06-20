@@ -15,7 +15,7 @@
 
 </div>
 
-> Replace `your-org` in the badges and links above with your GitHub org/user — see [`Docs/launch.md`](Docs/launch.md).
+> Replace `your-org` in the badges and links above with your GitHub org/user — see [`docs/launch.md`](docs/launch.md).
 
 ## Why this exists
 
@@ -148,7 +148,7 @@ library) must handle:
 ## Documentation & examples
 
 - 📚 **API docs (DocC):** https://your-org.github.io/MacAgentKit/documentation/macagentkit/
-- 🚀 **Getting started:** [`Docs/GettingStarted.md`](Docs/GettingStarted.md)
+- 🚀 **Getting started:** [`docs/GettingStarted.md`](docs/GettingStarted.md)
 - 🔎 **AXInspectorCLI** — `swift run AXInspectorCLI <bundleID> --identifiers`
 - 🖥️ **PermissionsDemo** — `swift run PermissionsDemo` (menu-bar dashboard + DND toggle)
 

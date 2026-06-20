@@ -33,7 +33,7 @@ language mode).
 - Unit-test all **pure** logic (predicates, parsing, matching, argument handling).
 - AX automation needs a UI session and can't run in CI — isolate pure logic
   behind testable functions and extend the manual integration checklist in
-  [`Docs/GettingStarted.md`](Docs/GettingStarted.md).
+  [`docs/GettingStarted.md`](docs/GettingStarted.md).
 
 Run `swift test` before opening a PR.
 
