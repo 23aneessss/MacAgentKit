@@ -8,7 +8,8 @@ public enum ShortcutsError: Error, Sendable, CustomStringConvertible {
     public var description: String {
         switch self {
         case .runFailed(let name, let status, let stderr):
-            return "ShortcutsError.runFailed(\(name), status: \(status), stderr: \(stderr.trimmingCharacters(in: .whitespacesAndNewlines)))"
+            return
+                "ShortcutsError.runFailed(\(name), status: \(status), stderr: \(stderr.trimmingCharacters(in: .whitespacesAndNewlines)))"
         }
     }
 }
@@ -47,7 +48,8 @@ public enum Shortcuts {
     /// Blocking — runs the CLI synchronously. Returns an empty array on failure.
     public static func list() -> [String] {
         guard let result = try? Subprocess.runSync(executable, ["list"], timeout: 15),
-              result.status == 0 else {
+            result.status == 0
+        else {
             return []
         }
         return parseList(result.stdout)

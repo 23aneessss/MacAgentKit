@@ -1,7 +1,7 @@
+import AppKit
 import ApplicationServices
 import CoreGraphics
 import Foundation
-import AppKit
 
 /// A safe, ergonomic Swift wrapper around a single `AXUIElement`.
 ///
@@ -94,7 +94,8 @@ public struct AXElement: @unchecked Sendable {
     /// Reads an attribute that is itself an `AXUIElement` and wraps it.
     func elementAttribute(_ name: String) -> AXElement? {
         guard let value = rawAttribute(name),
-              CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
+            CFGetTypeID(value) == AXUIElementGetTypeID()
+        else { return nil }
         return AXElement(unsafeDowncast(value, to: AXUIElement.self))
     }
 
@@ -149,15 +150,17 @@ public struct AXElement: @unchecked Sendable {
     /// The element's screen frame in global coordinates, if it has position+size.
     public var frame: CGRect? {
         guard let posRef = rawAttribute(kAXPositionAttribute),
-              CFGetTypeID(posRef) == AXValueGetTypeID(),
-              let sizeRef = rawAttribute(kAXSizeAttribute),
-              CFGetTypeID(sizeRef) == AXValueGetTypeID() else { return nil }
+            CFGetTypeID(posRef) == AXValueGetTypeID(),
+            let sizeRef = rawAttribute(kAXSizeAttribute),
+            CFGetTypeID(sizeRef) == AXValueGetTypeID()
+        else { return nil }
         let positionValue = unsafeDowncast(posRef, to: AXValue.self)
         let sizeValue = unsafeDowncast(sizeRef, to: AXValue.self)
         var point = CGPoint.zero
         var size = CGSize.zero
         guard AXValueGetValue(positionValue, .cgPoint, &point),
-              AXValueGetValue(sizeValue, .cgSize, &size) else { return nil }
+            AXValueGetValue(sizeValue, .cgSize, &size)
+        else { return nil }
         return CGRect(origin: point, size: size)
     }
 
@@ -202,7 +205,8 @@ public struct AXElement: @unchecked Sendable {
     public var actions: [String] {
         var names: CFArray?
         guard AXUIElementCopyActionNames(raw, &names) == .success,
-              let names = names as? [String] else { return [] }
+            let names = names as? [String]
+        else { return [] }
         return names
     }
 

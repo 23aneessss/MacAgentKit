@@ -1,5 +1,6 @@
-import Testing
 import ApplicationServices
+import Testing
+
 @testable import MAAccessibility
 
 @Suite("AXFailure")

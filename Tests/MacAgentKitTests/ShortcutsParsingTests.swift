@@ -1,4 +1,5 @@
 import Testing
+
 @testable import MAShortcuts
 
 @Suite("Shortcuts list parsing")

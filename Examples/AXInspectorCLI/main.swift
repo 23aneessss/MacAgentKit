@@ -18,21 +18,21 @@ func fail(_ message: String, code: Int32 = 1) -> Never {
 }
 
 let usage = """
-axinspect — print the Accessibility (AX) tree of a running app
+    axinspect — print the Accessibility (AX) tree of a running app
 
-USAGE:
-  axinspect <bundleID> [--max-depth N] [--identifiers] [--pid N]
+    USAGE:
+      axinspect <bundleID> [--max-depth N] [--identifiers] [--pid N]
 
-OPTIONS:
-  --max-depth N    Maximum traversal depth (default 25)
-  --identifiers    Only print elements that expose an AXIdentifier
-  --pid N          Inspect by process id instead of bundle id
-  -h, --help       Show this help
+    OPTIONS:
+      --max-depth N    Maximum traversal depth (default 25)
+      --identifiers    Only print elements that expose an AXIdentifier
+      --pid N          Inspect by process id instead of bundle id
+      -h, --help       Show this help
 
-EXAMPLES:
-  axinspect com.apple.finder
-  axinspect com.apple.controlcenter --identifiers
-"""
+    EXAMPLES:
+      axinspect com.apple.finder
+      axinspect com.apple.controlcenter --identifiers
+    """
 
 let arguments = Array(CommandLine.arguments.dropFirst())
 if arguments.isEmpty || arguments.contains("-h") || arguments.contains("--help") {
@@ -73,12 +73,14 @@ while index < arguments.count {
 }
 
 if !AXIsProcessTrusted() {
-    FileHandle.standardError.write(Data("""
-    ⚠️  This process is not trusted for Accessibility — the tree will be empty.
-        Grant Accessibility to your terminal in System Settings → Privacy & Security
-        → Accessibility, then re-run.
+    FileHandle.standardError.write(
+        Data(
+            """
+            ⚠️  This process is not trusted for Accessibility — the tree will be empty.
+                Grant Accessibility to your terminal in System Settings → Privacy & Security
+                → Accessibility, then re-run.
 
-    """.utf8))
+            """.utf8))
 }
 
 let appElement: AXElement
@@ -101,8 +103,11 @@ func describe(_ element: AXElement) -> String {
     parts.append(element.role ?? "?")
     if let subrole = element.subrole { parts.append("[\(subrole)]") }
     if let identifier = element.identifier { parts.append("#\(identifier)") }
-    if let title = element.title, !title.isEmpty { parts.append("\"\(title)\"") }
-    else if let description = element.axDescription, !description.isEmpty { parts.append("(\(description))") }
+    if let title = element.title, !title.isEmpty {
+        parts.append("\"\(title)\"")
+    } else if let description = element.axDescription, !description.isEmpty {
+        parts.append("(\(description))")
+    }
     return parts.joined(separator: " ")
 }
 
@@ -128,5 +133,6 @@ func walk(_ element: AXElement, depth: Int) {
 walk(appElement, depth: 0)
 
 if printedCount == 0 {
-    FileHandle.standardError.write(Data("No elements found (missing Accessibility permission, or app has no AX tree).\n".utf8))
+    FileHandle.standardError.write(
+        Data("No elements found (missing Accessibility permission, or app has no AX tree).\n".utf8))
 }

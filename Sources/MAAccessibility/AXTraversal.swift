@@ -65,7 +65,8 @@ extension AXElement {
         if predicate(self) { return self }
         guard remainingDepth > 0 else { return nil }
         for child in children {
-            if let found = child.firstMatch(remainingDepth: remainingDepth - 1, visited: &visited, predicate: predicate) {
+            if let found = child.firstMatch(remainingDepth: remainingDepth - 1, visited: &visited, predicate: predicate)
+            {
                 return found
             }
         }
@@ -82,7 +83,8 @@ extension AXElement {
         if predicate(self) { results.append(self) }
         guard remainingDepth > 0 else { return }
         for child in children {
-            child.collectMatches(remainingDepth: remainingDepth - 1, visited: &visited, results: &results, predicate: predicate)
+            child.collectMatches(
+                remainingDepth: remainingDepth - 1, visited: &visited, results: &results, predicate: predicate)
         }
     }
 

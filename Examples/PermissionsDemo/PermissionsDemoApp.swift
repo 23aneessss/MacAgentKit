@@ -70,7 +70,8 @@ struct DemoView: View {
                 try await DoNotDisturb.toggle()
                 statusMessage = "Do Not Disturb toggled via Control Center."
             } catch {
-                statusMessage = "Couldn't toggle via Control Center (\(error)).\nTip: install a Shortcut and use DoNotDisturb.setViaShortcut."
+                statusMessage =
+                    "Couldn't toggle via Control Center (\(error)).\nTip: install a Shortcut and use DoNotDisturb.setViaShortcut."
             }
             isWorking = false
         }

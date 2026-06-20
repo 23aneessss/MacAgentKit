@@ -1,5 +1,5 @@
-import Foundation
 import Darwin
+import Foundation
 import os
 
 private let log = Logger(subsystem: "com.macagentkit", category: "subprocess")

@@ -20,7 +20,8 @@ public enum Keyboard {
         for character in text {
             let utf16 = Array(String(character).utf16)
             guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: true),
-                  let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: false) else {
+                let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: false)
+            else {
                 log.error("Failed to create keyboard event")
                 continue
             }
@@ -39,7 +40,8 @@ public enum Keyboard {
     public static func key(_ code: CGKeyCode, modifiers: CGEventFlags = []) {
         let source = CGEventSource(stateID: .hidSystemState)
         guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: code, keyDown: true),
-              let keyUp = CGEvent(keyboardEventSource: source, virtualKey: code, keyDown: false) else {
+            let keyUp = CGEvent(keyboardEventSource: source, virtualKey: code, keyDown: false)
+        else {
             log.error("Failed to create keyboard event for code \(code)")
             return
         }
@@ -71,12 +73,14 @@ public enum Mouse {
 
     /// Moves the cursor to a global point.
     public static func move(to point: CGPoint) {
-        guard let event = CGEvent(
-            mouseEventSource: CGEventSource(stateID: .hidSystemState),
-            mouseType: .mouseMoved,
-            mouseCursorPosition: point,
-            mouseButton: .left
-        ) else {
+        guard
+            let event = CGEvent(
+                mouseEventSource: CGEventSource(stateID: .hidSystemState),
+                mouseType: .mouseMoved,
+                mouseCursorPosition: point,
+                mouseButton: .left
+            )
+        else {
             log.error("Failed to create mouse-move event")
             return
         }
@@ -86,8 +90,12 @@ public enum Mouse {
     /// Left-clicks at a global point.
     public static func click(at point: CGPoint) {
         let source = CGEventSource(stateID: .hidSystemState)
-        guard let down = CGEvent(mouseEventSource: source, mouseType: .leftMouseDown, mouseCursorPosition: point, mouseButton: .left),
-              let up = CGEvent(mouseEventSource: source, mouseType: .leftMouseUp, mouseCursorPosition: point, mouseButton: .left) else {
+        guard
+            let down = CGEvent(
+                mouseEventSource: source, mouseType: .leftMouseDown, mouseCursorPosition: point, mouseButton: .left),
+            let up = CGEvent(
+                mouseEventSource: source, mouseType: .leftMouseUp, mouseCursorPosition: point, mouseButton: .left)
+        else {
             log.error("Failed to create mouse-click event")
             return
         }

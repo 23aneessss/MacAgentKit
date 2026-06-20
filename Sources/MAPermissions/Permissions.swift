@@ -1,9 +1,9 @@
+import AppKit
 import ApplicationServices
 import CoreGraphics
 import CoreServices
 import Foundation
 import IOKit.hid
-import AppKit
 import os
 
 private let log = Logger(subsystem: "com.macagentkit", category: "permissions")
@@ -141,10 +141,10 @@ public enum Permissions {
             askIfNeeded
         )
         switch status {
-        case 0: return .granted                 // noErr
-        case -1744: return .notDetermined       // errAEEventWouldRequireUserConsent
-        case -600: return .notDetermined        // procNotFound — target app isn't running
-        default: return .denied                 // -1743 errAEEventNotPermitted, etc.
+        case 0: return .granted  // noErr
+        case -1744: return .notDetermined  // errAEEventWouldRequireUserConsent
+        case -600: return .notDetermined  // procNotFound — target app isn't running
+        default: return .denied  // -1743 errAEEventNotPermitted, etc.
         }
     }
 }
