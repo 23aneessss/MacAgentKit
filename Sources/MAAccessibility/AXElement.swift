@@ -173,6 +173,9 @@ public struct AXElement: @unchecked Sendable {
     /// The element's parent, if any.
     public var parent: AXElement? { elementAttribute(kAXParentAttribute) }
 
+    /// An application element's windows (`kAXWindowsAttribute`).
+    public var windows: [AXElement] { elementArrayAttribute(kAXWindowsAttribute) }
+
     /// The process id that owns this element, if obtainable.
     public var pid: pid_t? {
         var pid: pid_t = 0
